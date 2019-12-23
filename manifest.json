@@ -1,0 +1,52 @@
+{
+  "manifest_version": 2,
+  "name": "tab-killer",
+  "version": "1.0",
+  "description": "A chrome extension that can help you manage tabs easily.",
+	"permissions":
+	[
+		"contextMenus", // 右键菜单
+		"tabs", // 标签
+		"notifications", // 通知
+		"webRequest", // web请求
+		"webRequestBlocking", // 阻塞式web请求
+		"storage", // 插件本地存储
+		"http://*/*", // 可以通过executeScript或者insertCSS访问的网站
+		"https://*/*" // 可以通过executeScript或者insertCSS访问的网站
+	],
+  "icons": {
+    "16": "./icons/logo_16.png",
+    "32": "./icons/logo_32.png",
+    "48": "./icons/logo_48.png",
+    "128": "./icons/logo_128.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": 
+	[
+		{
+			//"matches": ["http://*/*", "https://*/*"],
+			// "<all_urls>" 表示匹配所有地址
+			"matches": ["<all_urls>"],
+			// 多个JS按顺序注入
+			"js": ["src/content-script.js"],
+			"run_at": "document_start"
+		}
+	],
+  "browser_action": {
+    "default_icon": {
+      "16": "./icons/logo_16.png",
+      "32": "./icons/logo_32.png",
+      "48": "./icons/logo_48.png"
+    },
+    "default_title": "Tab Killer",
+    "default_popup": "./popup.html"
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "windows": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
+      }
+    }
+  }
+}
