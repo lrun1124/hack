@@ -4,7 +4,24 @@ document.addEventListener('click', function(event) {
     if(event.target.innerText === 'Link'){
         event.preventDefault();
         console.log('click');
-        readFromRally();
+
+        // send message to background.js
+        readFromRally('yayaya');
+        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';// _N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk
+        const objectID = '353727744848';
+        // 1) read discussion
+        // let message = {type: 'readDiscussion', objectID: objectID, APIKey: APIKey};
+        // chrome.runtime.sendMessage(message, function(response) {
+        //     console.log(response);
+        // });
+
+        // 2) write discussion
+        let message = {type: 'writeDiscussion', objectID: objectID, APIKey: APIKey, text: 'lihaoyayay  hahaha  test ddsvds.'};
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log(response);
+        });
+
+
         tip(event.target.href, event.clientX, event.clientY);
     }
 });
@@ -72,10 +89,10 @@ function tip(info, x, y) {
     bindEvent();
 }
 
-function readFromRally(info) {
+function readFromRally(ObjectID) {
     //todo
 }
 
-function writeToRally(info) {
+function writeToRally(ObjectID) {
     //todo
 }
