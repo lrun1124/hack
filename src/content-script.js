@@ -1,4 +1,10 @@
 console.log('content script!');
+const REGRESSION_VALUE = [
+    "Yes",
+    "No",
+    "TBD",
+    "Found by new feature testing"
+];
 
 
 const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
@@ -25,6 +31,25 @@ document.addEventListener('click', function(event) {
         });
 
         tip(event.target.href, event.clientX, event.clientY);
+    } else if(REGRESSION_VALUE.includes(event.target.innerText)) {
+        /*
+         * code example
+         * modify later
+        */
+        
+        // send message to background.js
+        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
+        const defectID = '341373250384'/*DE152224*/;
+        const fieldName = 'c_Regression';
+        const fieldValue = 'No';
+
+        // 3) update rally regression value
+        let message = {type: 'updateDefectField', objectID: defectID, APIKey: APIKey, fieldName: fieldName, fieldValue: fieldValue};
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log(response);
+        });
+
+        event.target.innerText = fieldValue;
     }
 });
 
