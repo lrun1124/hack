@@ -1,4 +1,10 @@
 console.log('content script!');
+const REGRESSION_VALUE = [
+    "Yes",
+    "No",
+    "TBD",
+    "Found by new feature testing"
+];
 
 document.addEventListener('click', function(event) {
     if(event.target.innerText === 'Link'){
@@ -6,8 +12,7 @@ document.addEventListener('click', function(event) {
         console.log('click');
 
         // send message to background.js
-        readFromRally('yayaya');
-        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';// _N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk
+        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
         const objectID = '353727744848';
         // 1) read discussion
         // let message = {type: 'readDiscussion', objectID: objectID, APIKey: APIKey};
@@ -16,13 +21,33 @@ document.addEventListener('click', function(event) {
         // });
 
         // 2) write discussion
-        let message = {type: 'writeDiscussion', objectID: objectID, APIKey: APIKey, text: 'lihaoyayay  hahaha  test ddsvds.'};
+        let message = {type: 'writeDiscussion', objectID: objectID, APIKey: APIKey, text: 'lihaoyayay  hahaha  test ddsvdsa按时aaaの →.'};
         chrome.runtime.sendMessage(message, function(response) {
             console.log(response);
         });
 
 
         tip(event.target.href, event.clientX, event.clientY);
+    } else if(true/*REGRESSION_VALUE.includes(event.target.innerText)*/) {
+        /*
+         * code example
+         * modify later
+        */
+       console.log(REGRESSION_VALUE.includes(event.target.innerText));
+        
+        // send message to background.js
+        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
+        const defectID = '341373250384'/*DE152224*/;
+        const fieldName = 'c_Regression';
+        const fieldValue = 'No';
+
+        // 3) update rally regression value
+        let message = {type: 'updateDefectRegression', objectID: defectID, APIKey: APIKey, fieldName: fieldName, fieldValue: fieldValue};
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log(response);
+        });
+
+        event.target.innerText = fieldValue;
     }
 });
 
@@ -35,7 +60,10 @@ function bindEvent(){
     oPostBtn.onclick = function(){
         if(oInput.value){
             //写入的时间
-            writeToRally();
+
+            // here call write funtion
+            // writeXXX();
+
             var oTime = document.createElement("div");
             oTime.className = "time";
             var myDate = new  Date();
@@ -87,12 +115,4 @@ function tip(info, x, y) {
     ele.classList.add('animated');
 
     bindEvent();
-}
-
-function readFromRally(ObjectID) {
-    //todo
-}
-
-function writeToRally(ObjectID) {
-    //todo
 }
