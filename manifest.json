@@ -28,7 +28,8 @@
 			// "<all_urls>" 表示匹配所有地址
 			"matches": ["<all_urls>"],
 			// 多个JS按顺序注入
-			"js": ["src/content-script.js"],
+      "js": ["src/content-script.js"],
+      "css": ["src/css1.css", "src/css2.css", "src/css3.css", "src/css4.css"],
 			"run_at": "document_start"
 		}
   ],
