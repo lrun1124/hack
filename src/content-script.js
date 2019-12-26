@@ -11,9 +11,97 @@ const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
 const defaultName = 'Li Hao'; // _N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk
 const defaultDate = '2019-12-28';
 var objectID = '';
+const tempArr = [{
+    machineName: 'Rally',
+    newMahinceId: '001'
+},
+{
+    machineName: 'Agile',
+    newMahinceId: '002'
+},
+{
+    machineName: 'data',
+    newMahinceId: '003'
+},
+{
+    machineName: 'plan',
+    newMahinceId: '004'
+},
+{
+    machineName: 'security',
+    newMahinceId: '005'
+},
+{
+    machineName: 'mission',
+    newMahinceId: '006'
+},
+{
+    machineName: 'Logical Access',
+    newMahinceId: '007'
+},
+{
+    machineName: 'Research',
+    newMahinceId: '008'
+},{
+    machineName: 'Server Dependency',
+    newMahinceId: '009'
+},
+{
+    machineName: 'Polaris',
+    newMahinceId: '0010'
+},
+{
+    machineName: 'Logical Access',
+    newMahinceId: '011'
+},
+{
+    machineName: 'Directory Gateway',
+    newMahinceId: '012'
+},{
+    machineName: 'Reviewed',
+    newMahinceId: '013'
+},
+{
+    machineName: 'ABA',
+    newMahinceId: '014'
+},
+{
+    machineName: '[T161]',
+    newMahinceId: '015'
+},
+{
+    machineName: 'vpn',
+    newMahinceId: '018'
+}];
+
+const statusArr = [{
+    machineName: 'PM0 Discarded',
+    newMahinceId: '001'
+},
+{
+    machineName: 'PM1 In Progress',
+    newMahinceId: '002'
+},
+{
+    machineName: 'PM2 PM Approved',
+    newMahinceId: '003'
+},
+{
+    machineName: 'PM3 TVP PM Approved',
+    newMahinceId: '004'
+},
+{
+    machineName: 'PM4 PO Approved',
+    newMahinceId: '005'
+},
+{
+    machineName: 'PM5 TVP P0 Approved',
+    newMahinceId: '006'
+}];
 
 document.addEventListener('click', function(event) {
     if(event.target.innerText === 'Link' &&  window.openDiscussion !== false){
+        window.rallyClickTarget = event.target;
         event.preventDefault();
         console.log('click');
 
@@ -32,6 +120,7 @@ document.addEventListener('click', function(event) {
 
         tip(event.target.href, event.clientX, event.clientY);
     } else if(REGRESSION_VALUE.includes(event.target.innerText)) {
+        window.rallyClickTarget = event.target;
         /*
          * code example
          * modify later
@@ -50,8 +139,15 @@ document.addEventListener('click', function(event) {
         });
 
         event.target.innerText = fieldValue;
+    } else if (event.target.getAttribute('ei') === '14') {
+        window.rallyClickTarget = event.target;
+        TagPulldown(undefined, event.clientX, event.clientY);
+    } else if (event.target.getAttribute('ei') === '15'){
+
     }
+    
 });
+
 
 function bindEvent(){
     var oPostBtn = document.getElementById("doPost");
@@ -71,6 +167,26 @@ function bindEvent(){
     }
 }
 
+
+function bindTagEvent(){
+    var oCloseBtn = document.getElementById("TagdoClose");
+    var oPostBtn = document.getElementById("TagdoPost");
+    var oAddBtn = document.getElementById("TagdoAdd");
+    var currentTag = document.getElementById("current_tag");
+    oAddBtn.onclick = function(){
+        var input = document.getElementById("select_input");
+        currentTag.value = currentTag.value + ',' + input.value;
+    }
+    oPostBtn.onclick = function(){
+        if(window.rallyClickTarget) {
+            window.rallyClickTarget.innerText = currentTag.value;
+            document.getElementById('TagPulldown').remove();
+        }
+    }
+    oCloseBtn.onclick = function() {
+        document.getElementById('TagPulldown').remove();
+    }
+}
 function addComment(msg, isAdd){
     var text, name, name;
     if(isAdd){
@@ -98,8 +214,114 @@ function addComment(msg, isAdd){
     </div>
     `;
     oMessageBox.insertBefore(oMessageContent, oMessageBox.children[0]);
-    
 }
+
+function TagPulldown(list, x, y) {
+    
+    var eleId = 'TagPulldown';
+    if(document.getElementById(eleId)) {
+        document.getElementById(eleId).remove();
+    }
+	list = list || tempArr;
+    var ele = document.createElement('div');
+    ele.id = eleId;
+    ele.className = 'chrome-plugin-simple-tip';
+    ele.style.background = '#e6e6e6';
+	ele.style.position = 'fixed';
+	ele.style.top = (10 + y) + 'px';
+	ele.style.left = (10 + x) + 'px';
+	//ele.style.width = '500px';
+    //ele.style.height = '350px';
+    ele.style.zIndex = 999999;
+    ele.style.padding = '10px';
+    ele.style.border= "1.5px solid #a1a1a1";
+    ele.style.borderRadius ='5px';
+
+	ele.innerHTML = `
+        <div>
+            <span style="color:#222;font-weight:bold">Tag</span>
+            <span id="TagdoClose" class="icon-cancel" style="padding-left:150px"></span>
+        </div>
+        <div class="select-content">
+            <input type="hidden" name="newMachineId">
+            <input type="text" name="select_input" id="current_tag" style="width:200px; margin-top:10px"/>
+            <button id="TagdoPost" style="color:black;font-weight:bold;float:right;margin:10px 0">submit</button>
+            <input type="text" name="select_input" id="select_input" class="select-input" value="" autocomplete="off" placeholder="Input tag" />
+            <button id="TagdoAdd" style="color:black;font-weight:bold;float:right;margin:10px 0">add</button>
+            <div id="search_select" class="search-select">
+                <ul id="select_ul" class="select-ul"> 
+            </ul>
+        </div>
+    </div>
+    `
+	document.body.appendChild(ele);
+    document.getElementById('current_tag').value = window.rallyClickTarget.innerText;
+    searchInput(tempArr);
+    bindTagEvent();
+}
+
+function newOptions(tempArr){
+    var listArr = [];
+    for(var i=0;i<tempArr.length;i++){
+        if(tempArr[i].machineName.indexOf($('#select_input').val()) > -1){
+            listArr.push(tempArr[i]);
+        }
+    }
+    var options = '';
+    for(var i = 0; i < listArr.length; i++) {
+        opt = '<li class="li-select" data-newMachineId="' + listArr[i].newMahinceId + '">' + listArr[i].machineName + '</li>';
+        options += opt;
+    }
+    if(options == ''){
+        $('#search_select').hide();
+    }else{
+        $('#search_select').show();
+        $('#select_ul').html('').append(options);
+    }
+}
+
+function searchInput(tempArr){
+    $('select-content .sanjiao').on('click',function(){
+        $('#select_input').focus();
+    });
+    $('#select_input').on('keyup',function(){
+        newOptions(tempArr);
+    });
+    $('#select_input').on('focus',function(){
+        $('#search_select').show();
+        newOptions(tempArr);
+    });
+    $('#select_ul .li-disabled').on('click',function(){
+        $('#search_select').show();
+    });
+    $('#search_select').on('mouseover',function(){
+        $(this).addClass('ul-hover');
+    });
+    $('#search_select').on('mouseout',function(){
+        $(this).removeClass('ul-hover');
+    });
+    $('#select_input').on('blur',function(){
+        if($('#search_select').hasClass('ul-hover')){
+            $('#search_select').show();
+        }else{
+            $('#search_select').hide();
+        }
+    });
+    $('#select_ul').delegate('.li-select', 'click',function(){
+        $('#select_ul .li-select').removeClass('li-hover');
+        var selectText = $(this).html();
+        var newMachineIdVal = $($(this)[0]).attr("data-newMachineId");
+        $('#select_input').val(selectText);
+        $('#search_select').hide();
+        $("input[name='newMachineId']").val(newMachineIdVal);
+//          console.log($("input[name='newMachineId']").val())
+    });
+    $('#select_ul').delegate('.li-select', 'mouseover',function(){
+        $('#select_ul .li-select').removeClass('li-hover');
+        $(this).addClass('li-hover');
+    });
+}
+
 function tip(info, x, y) {
     var eleId = 'Discussion';
     if(document.getElementById(eleId)) {
@@ -117,15 +339,16 @@ function tip(info, x, y) {
     ele.style.height = '350px';
     ele.style.zIndex = 999999;
     ele.style.padding = '10px';
-
+    ele.style.border= "1.5px solid #a1a1a1";
+    ele.style.borderRadius ='5px';
 	ele.innerHTML = `
-        <div class="">
+        <div>
             <span style="color:#222;font-weight:bold">Discussion</span>
             <span id="doClose" class="icon-cancel" style="padding-left:300px"></span>
         </div>
         <div style="padding:10px 0">
             <input id="myInput" class="x4-form-field x4-form-text" style="width:346px;height:25px"></input>
-            <button id="doPost" style="color:black;font-weight:bold">post</button>
+            <button id="doPost" style="color:black;font-weight:bold;border:'2px solid #a1a1a1';borderRadius:'5px'">post</button>
         </div>
         <div class="message_box" id="messageBox" style="overflow:scroll;max-height:260px"></div>
     `
@@ -141,4 +364,8 @@ function writeToRally(ObjectID, APIKey, text) {
     chrome.runtime.sendMessage(write_message, function(response) {
         console.log(response);
     });
+}
+
+function clearTarget() {
+    window.rallyClickTarget = undefined;
 }
