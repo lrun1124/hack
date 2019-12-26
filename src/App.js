@@ -1,7 +1,5 @@
 import React from 'react';
 import logo from './ms_logo.png'
-
-
 import {
   Switch,
   Avatar,
@@ -9,30 +7,63 @@ import {
   Button,
 } from 'antd';
 
-export default class App extends React.PureComponent {
+const rallyKey = 'Rally';
+if (!localStorage.getItem(rallyKey)) {
+  let rallyValue = {
+    apiKey: '',
+    defectFields: {}
+  };
+  localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+}
 
-  state = {
-    showKey: true,
-    login: false
+export default class App extends React.PureComponent {
+  constructor(props) {
+    super(props);
+
+    const apiKey = this.getAPIKey();
+    this.state = {
+      editKey: !apiKey,
+      login: !!apiKey,
+      inputKeyString: apiKey
+    };
   }
-  switchPanel = () => {
+
+  getAPIKey = () => {
+    const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+    return rallyValue.apiKey;
+  }
+
+  updateAPIKey = (key) => {
+    let rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+    rallyValue.apiKey = key;
+    localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+  }
+
+  onSwitchPanel = () => {
     this.setState({
-      showKey: !this.state.showKey
+      editKey: !this.state.editKey
     });
   }
-  submitClick = (e) => {
+
+  onSaveClick = (e) => {
+    this.updateAPIKey(this.state.inputKeyString);
     this.setState({
-      showKey: !this.state.showKey,
+      editKey: !this.state.editKey,
       login: true
     });
-    //window.APIKey
   }
+
+  onChangeInput = (e) => {
+    this.setState({ inputKeyString: e.target.value });
+  };
+
   render() {
-    const {showKey, login} = this.state
+    const {editKey, login, inputKeyString} = this.state
+
     const apiKeyPanel = (
       <div className="app-apiKeyPanel">
-        <Input className="app-input" placeholder={'Input Rally APIKey here'} />
-        <Button className="app-submit" onClick={this.submitClick}> Save </Button>
+        <Input className="app-input" placeholder={'Input Rally APIKey here'} defaultValue={inputKeyString} onChange={this.onChangeInput} />
+        <Button className="app-submit" onClick={this.onSaveClick}> Save </Button>
       </div>
     )
     const editablePanel = (
@@ -62,12 +93,12 @@ export default class App extends React.PureComponent {
     )
     var loginPanel
     if(login) {
-      loginPanel = (<Avatar style={{ backgroundColor: '#87d068'}} className="app-Avatar" icon="user" onClick={this.switchPanel}/>
+      loginPanel = (<Avatar style={{ backgroundColor: '#87d068'}} className="app-Avatar" icon="user" onClick={this.onSwitchPanel}/>
       )
     } else {
       loginPanel = (<Avatar icon="user" className="app-Avatar"/>)
     }
-    if(showKey) {
+    if(editKey) {
       return (
         <div className="app-container">
             <div>
