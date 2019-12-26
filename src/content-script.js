@@ -143,11 +143,40 @@ document.addEventListener('click', function(event) {
         window.rallyClickTarget = event.target;
         TagPulldown(undefined, event.clientX, event.clientY);
     } else if (event.target.getAttribute('ei') === '15'){
-
+        window.rallyClickTarget = event.target;
+        statusPulldown(undefined, event.clientX, event.clientY);
     }
     
 });
 
+function addComment(msg, isAdd){
+    var text, name, name;
+    if(isAdd){
+        text = msg;
+        name = defaultName;
+        time = defaultDate;
+    } else {
+        text = msg.Text;
+        name = msg.User._refObjectName;
+        time = msg.CreationDate.split('T')[0];
+    }
+    var oMessageBox = document.getElementById("messageBox");
+    var oMessageContent = document.createElement("div");
+    oMessageContent.className = "message_content";
+    oMessageContent.innerHTML = `
+    <div style="background:white; border-bottom:1px solid grey">
+        <div style="padding: 5px 5px">
+            <div>
+                <span style="font-weight:bold">${name}</span>
+                <span style="padding-left:5px">${time}</span>
+            </div>
+
+            <div>${text}</div>
+        </div>
+    </div>
+    `;
+    oMessageBox.insertBefore(oMessageContent, oMessageBox.children[0]);
+}
 
 function bindEvent(){
     var oPostBtn = document.getElementById("doPost");
@@ -187,37 +216,23 @@ function bindTagEvent(){
         document.getElementById('TagPulldown').remove();
     }
 }
-function addComment(msg, isAdd){
-    var text, name, name;
-    if(isAdd){
-        text = msg;
-        name = defaultName;
-        time = defaultDate;
-    } else {
-        text = msg.Text;
-        name = msg.User._refObjectName;
-        time = msg.CreationDate.split('T')[0];
-    }
-    var oMessageBox = document.getElementById("messageBox");
-    var oMessageContent = document.createElement("div");
-    oMessageContent.className = "message_content";
-    oMessageContent.innerHTML = `
-    <div style="background:white; border-bottom:1px solid grey">
-        <div style="padding: 5px 5px">
-            <div>
-                <span style="font-weight:bold">${name}</span>
-                <span style="padding-left:5px">${time}</span>
-            </div>
 
-            <div>${text}</div>
-        </div>
-    </div>
-    `;
-    oMessageBox.insertBefore(oMessageContent, oMessageBox.children[0]);
+function bindStatusEvent(){
+    var oCloseBtn = document.getElementById("statusdoClose");
+    var oPostBtn = document.getElementById("statusdoPost");
+    var currentStatus = document.getElementById("select_input");
+    oPostBtn.onclick = function(){
+        if(window.rallyClickTarget) {
+            window.rallyClickTarget.innerText = currentStatus.value;
+            document.getElementById('statusPulldown').remove();
+        }
+    }
+    oCloseBtn.onclick = function() {
+        document.getElementById('statusPulldown').remove();
+    }
 }
 
 function TagPulldown(list, x, y) {
-    
     var eleId = 'TagPulldown';
     if(document.getElementById(eleId)) {
         document.getElementById(eleId).remove();
@@ -230,8 +245,6 @@ function TagPulldown(list, x, y) {
 	ele.style.position = 'fixed';
 	ele.style.top = (10 + y) + 'px';
 	ele.style.left = (10 + x) + 'px';
-	//ele.style.width = '500px';
-    //ele.style.height = '350px';
     ele.style.zIndex = 999999;
     ele.style.padding = '10px';
     ele.style.border= "1.5px solid #a1a1a1";
@@ -246,7 +259,7 @@ function TagPulldown(list, x, y) {
             <input type="hidden" name="newMachineId">
             <input type="text" name="select_input" id="current_tag" style="width:200px; margin-top:10px"/>
             <button id="TagdoPost" style="color:black;font-weight:bold;float:right;margin:10px 0">submit</button>
-            <input type="text" name="select_input" id="select_input" class="select-input" value="" autocomplete="off" placeholder="Input tag" />
+            <input type="text" name="select_input" id="select_input" class="select-input" value="" autocomplete="off" placeholder="Search" />
             <button id="TagdoAdd" style="color:black;font-weight:bold;float:right;margin:10px 0">add</button>
             <div id="search_select" class="search-select">
                 <ul id="select_ul" class="select-ul"> 
@@ -259,6 +272,44 @@ function TagPulldown(list, x, y) {
     searchInput(tempArr);
     bindTagEvent();
 }
+
+function statusPulldown(list, x, y) {
+    var eleId = 'statusPulldown';
+    if(document.getElementById(eleId)) {
+        document.getElementById(eleId).remove();
+    }
+    var ele = document.createElement('div');
+    ele.id = eleId;
+    ele.className = 'chrome-plugin-simple-tip';
+    ele.style.background = '#e6e6e6';
+	ele.style.position = 'fixed';
+	ele.style.top = (10 + y) + 'px';
+	ele.style.left = (10 + x) + 'px';
+    ele.style.zIndex = 999999;
+    ele.style.padding = '10px';
+    ele.style.border= "1.5px solid #a1a1a1";
+    ele.style.borderRadius ='5px';
+
+	ele.innerHTML = `
+        <div>
+            <span style="color:#222;font-weight:bold">PM STATUS</span>
+            <span id="statusdoClose" class="icon-cancel" style="padding-left:100px"></span>
+        </div>
+        <div class="select-content">
+            <input type="hidden" name="newMachineId">
+            <input type="text" name="select_input" id="select_input" style="margin-top:10px" class="select-input" value="" autocomplete="off" placeholder="Search" />
+            <button id="statusdoPost" style="color:black;font-weight:bold;float:right;margin:10px 0">submit</button>
+            <div id="search_select" class="search-select" style="top:40px">
+                <ul id="select_ul" class="select-ul"> 
+            </ul>
+        </div>
+    </div>
+    `
+	document.body.appendChild(ele);
+    searchInput(statusArr);
+    bindStatusEvent();
+}
+
 
 function newOptions(tempArr){
     var listArr = [];
