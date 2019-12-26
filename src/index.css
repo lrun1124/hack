@@ -13,13 +13,53 @@
   border-radius: 0;
 }
 /** end of overriding antd css */
-
-.app-container {
-  width: 200px;
-  height: 150px;
-  background-color: #FFF;
+.app-logo{
+  width: 30px;
+  height: 30px;
+  background: white;
 }
+.app-container {
+  width: 300px;
+  height: 300px;
+  padding: 10px;
+  background: "grey";
+}
+.app-apiKeyPanel {
+  background: "rgb(230, 230, 230)";
+  padding-top: 30px;
+}
+.app-input {
+  width: 280px;
+}
+.app-Avatar {
+  float: right;
+}
+.app-submit {
+  margin-top: 20px;
+  float: right;
+}
+.app-field {
+  background: white;
+  margin: 10px;
+  height: 25px;
+  border: 1px solid #a1a1a1; 
+  border-radius:5px;
+} 
 
+.app-field-box {
+  text-align: center;
+}
+.app-switch {
+  float: right;
+  height: 25px;
+}         
+.app-editablePanel {
+  padding-top: 20px;
+}
+.app-dis  {
+  line-height: 30px;
+  margin-left: 15px;
+}
 .loading-container {
   display: flex;
   justify-content: center;
