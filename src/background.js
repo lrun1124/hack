@@ -1,10 +1,10 @@
-function readDiscussionFromRally(objectID, APIKey, resolve, reject) {
+function readDiscussionFromRally(objectID, resolve, reject) {
     const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/artifact/'+ objectID + '/Discussion';
     
     let request = new XMLHttpRequest();
     request.open('GET', url);
     request.responseType = 'json';
-    request.setRequestHeader('ZSESSIONID', APIKey);
+    request.setRequestHeader('ZSESSIONID', getAPIKey());
     request.onreadystatechange = function() {
 		if (request.readyState == XMLHttpRequest.DONE) {
 			if (request.status == 200) {
@@ -18,7 +18,7 @@ function readDiscussionFromRally(objectID, APIKey, resolve, reject) {
     request.send();
 }
 
-function writeDiscussionToRally(objectID, APIKey, text, resolve, reject) {
+function writeDiscussionToRally(objectID, text, resolve, reject) {
     const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/conversationpost/create';
     const param = {
         ConversationPost: {
@@ -29,7 +29,7 @@ function writeDiscussionToRally(objectID, APIKey, text, resolve, reject) {
 
     let request = new XMLHttpRequest();
     request.open('POST', url, true);
-    request.setRequestHeader('ZSESSIONID', APIKey);
+    request.setRequestHeader('ZSESSIONID', getAPIKey());
     request.setRequestHeader('Content-Type', 'text/plain');
 
     request.onreadystatechange = function() {
@@ -44,7 +44,7 @@ function writeDiscussionToRally(objectID, APIKey, text, resolve, reject) {
     request.send(JSON.stringify(param));
 }
 
-function updateDefectFieldValueOnRally(objectID, APIKey, fieldName, fieldValue, resolve, reject) {
+function updateDefectFieldValueOnRally(objectID, fieldName, fieldValue, resolve, reject) {
     const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/defect/' + objectID;
     const param = {
         Defect: {
@@ -55,7 +55,7 @@ function updateDefectFieldValueOnRally(objectID, APIKey, fieldName, fieldValue, 
 
     let request = new XMLHttpRequest();
     request.open('POST', url, true);
-    request.setRequestHeader('ZSESSIONID', APIKey);
+    request.setRequestHeader('ZSESSIONID', getAPIKey());
     request.setRequestHeader('Content-Type', 'text/plain');
 
     request.onreadystatechange = function() {
@@ -76,11 +76,22 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 {
     console.log(request, sender, sendResponse);
     if(request.type === 'readDiscussion') {
-        readDiscussionFromRally(request.objectID, request.APIKey, sendResponse);
+        readDiscussionFromRally(request.objectID, sendResponse);
     } else if (request.type === 'writeDiscussion') {
-        writeDiscussionToRally(request.objectID, request.APIKey, request.text, sendResponse)
+        writeDiscussionToRally(request.objectID, request.text, sendResponse)
     } else if (request.type === 'updateDefectField') {
-        updateDefectFieldValueOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
+        updateDefectFieldValueOnRally(request.objectID, request.fieldName, request.fieldValue, sendResponse)
     }
     return true;
 });
+
+function getAPIKey() {
+  const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+  return rallyValue.apiKey;
+}
+
+function updateAPIKey(key) {
+  let rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+  rallyValue.apiKey = key;
+  localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+}
