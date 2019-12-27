@@ -110,7 +110,7 @@ document.addEventListener('click', function(event) {
         const temp = event.target.href.split('/');
         objectID = temp[temp.length-1];
         // read discussion
-        let read_message = {type: 'readDiscussion', objectID: objectID, APIKey: APIKey};
+        let read_message = {type: 'readDiscussion', objectID: objectID};
         chrome.runtime.sendMessage(read_message, function(response) {
             console.log(response);
             var list = response.Results;
@@ -127,7 +127,7 @@ document.addEventListener('click', function(event) {
     //      * code example
     //      * modify later
     //     */
-        
+
     //     // send message to background.js
     //     const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
     //     const defectID = '341373250384'/*DE152224*/;
@@ -139,7 +139,6 @@ document.addEventListener('click', function(event) {
     //     chrome.runtime.sendMessage(message, function(response) {
     //         console.log(response);
     //     });
-
     //     event.target.innerText = fieldValue;
     //} 
     else if (event.target.getAttribute('ei') === '14') {
@@ -191,7 +190,7 @@ function bindEvent(){
     oPostBtn.onclick = function(){
         if(oInput.value){          
             addComment(oInput.value, true);
-            writeToRally(objectID, APIKey, oInput.value);
+            writeToRally(objectID, oInput.value);
             oInput.value = "";
         }
     }
@@ -416,8 +415,8 @@ function tip(info, x, y) {
 }
 
 
-function writeToRally(ObjectID, APIKey, text) {
-    let write_message = {type: 'writeDiscussion', objectID: ObjectID, APIKey: APIKey, text: text};
+function writeToRally(ObjectID, text) {
+    let write_message = {type: 'writeDiscussion', objectID: ObjectID, text: text};
     chrome.runtime.sendMessage(write_message, function(response) {
         console.log(response);
     });
