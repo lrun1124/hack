@@ -127,10 +127,9 @@ function postRequest(url, param, resolve, reject) {
 }
 
 function getAPIKey() {
-    //const rallyKey = 'Rally';
-    //const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-    //return rallyValue.apiKey;
-    return '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
+    const rallyKey = 'Rally';
+    const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+    return rallyValue.apiKey;
 }
 
 function updateAPIKey(key) {
