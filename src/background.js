@@ -26,22 +26,7 @@ function writeDiscussionToRally(objectID, text, resolve, reject) {
           'Artifact': objectID
         }
     };
-
-    let request = new XMLHttpRequest();
-    request.open('POST', url, true);
-    request.setRequestHeader('ZSESSIONID', getAPIKey());
-    request.setRequestHeader('Content-Type', 'text/plain');
-
-    request.onreadystatechange = function() {
-		if (request.readyState == XMLHttpRequest.DONE) {
-			if (request.status == 200) {
-                resolve(request.response);
-			} else {
-				reject(request.status);
-			}
-		}
-    };
-    request.send(JSON.stringify(param));
+    postRequest(url, JSON.stringify(param), resolve, reject);
 }
 
 function updateDefectFieldValueOnRally(objectID, fieldName, fieldValue, resolve, reject) {
@@ -52,7 +37,78 @@ function updateDefectFieldValueOnRally(objectID, fieldName, fieldValue, resolve,
         }
     };
     const stringifyParam = JSON.stringify(param).replace('${fieldName}', fieldName);
+    postRequest(url, stringifyParam, resolve, reject);
+}
 
+function updatePortfolioItemOnRally(objectID, APIKey, fieldName, fieldValue, resolve, reject) {
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/portfolioitem/' + objectID;
+    const param = {
+        PortfolioItem: {
+            '${fieldName}': fieldValue
+        }
+    };
+    const stringifyParam = JSON.stringify(param).replace('${fieldName}', fieldName);
+    postRequest(url, stringifyParam, resolve, reject);
+}
+
+function addDefectTagsOnRally(objectID, tagList, resolve, reject) {
+    /*
+        tagList is Array.
+        tagList = [
+            {
+                "Name": "New_Tag_Name"                                                          // for adding new tag
+            },
+            {
+                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/294687977200"      // for adding existed tag
+            },
+            ......
+        ]
+    */
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/defect/' + objectID + '/tags/add?fetch=Name';
+    const param = {
+        CollectionItems: tagList
+    };
+    postRequest(url, JSON.stringify(param), resolve, reject);
+}
+
+function removeDefectTagsOnRally(objectID, tagList, resolve, reject) {
+    /*
+        tagList is Array.
+        tagList = [
+            {
+                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/294687977200"      // for removing existed tag
+            },
+            ......
+        ]
+    */
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/defect/' + objectID + '/tags/remove';
+    const param = {
+        CollectionItems: tagList
+    };
+    postRequest(url, JSON.stringify(param), resolve, reject);
+}
+
+// listen the message from content-script.js
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
+{
+    console.log(request, sender, sendResponse);
+    if(request.type === 'readDiscussion') {
+        readDiscussionFromRally(request.objectID, sendResponse);
+    } else if (request.type === 'writeDiscussion') {
+        writeDiscussionToRally(request.objectID, request.text, sendResponse);
+    } else if (request.type === 'updateDefectField') {
+        updateDefectFieldValueOnRally(request.objectID, request.fieldName, request.fieldValue, sendResponse);
+    } else if (request.type === 'updatePortfolioItem') {
+        updatePortfolioItemOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse);
+    } else if (request.type === 'addDefectTags') {
+        addDefectTagsOnRally(request.objectID, request.tagList, sendResponse);
+    } else if (request.type === 'removeDefectTags') {
+        removeDefectTagsOnRally(request.objectID, request.tagList, sendResponse);
+    }
+    return true;
+});
+
+function postRequest(url, param, resolve, reject) {
     let request = new XMLHttpRequest();
     request.open('POST', url, true);
     request.setRequestHeader('ZSESSIONID', getAPIKey());
@@ -67,59 +123,19 @@ function updateDefectFieldValueOnRally(objectID, fieldName, fieldValue, resolve,
 			}
 		}
     };
-    request.send(stringifyParam);
+    request.send(param);
 }
-
-function updatePortfolioItemOnRally(objectID, APIKey, fieldName, fieldValue, resolve, reject) {
-    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/portfolioitem/' + objectID;
-    const param = {
-        PortfolioItem: {
-            '${fieldName}': fieldValue
-        }
-    };
-    const stringifyParam = JSON.stringify(param).replace('${fieldName}', fieldName);
-
-    let request = new XMLHttpRequest();
-    request.open('POST', url, true);
-    request.setRequestHeader('ZSESSIONID', APIKey);
-    request.setRequestHeader('Content-Type', 'text/plain');
-
-    request.onreadystatechange = function() {
-		if (request.readyState == XMLHttpRequest.DONE) {
-			if (request.status == 200) {
-                resolve(request.response);
-			} else {
-				reject(request.status);
-			}
-		}
-    };
-    request.send(stringifyParam);
-}
-
-// listen the message from content-script.js
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
-{
-    console.log(request, sender, sendResponse);
-    if(request.type === 'readDiscussion') {
-        readDiscussionFromRally(request.objectID, sendResponse);
-    } else if (request.type === 'writeDiscussion') {
-        writeDiscussionToRally(request.objectID, request.text, sendResponse)
-    } else if (request.type === 'updateDefectField') {
-        updateDefectFieldValueOnRally(request.objectID, request.fieldName, request.fieldValue, sendResponse)
-    } else if (request.type === 'updatePortfolioItem') {
-        updatePortfolioItemOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
-    }
-    return true;
-});
 
 function getAPIKey() {
-  //const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-  //return rallyValue.apiKey;
-  return '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
+    //const rallyKey = 'Rally';
+    //const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+    //return rallyValue.apiKey;
+    return '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
 }
 
 function updateAPIKey(key) {
-  let rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-  rallyValue.apiKey = key;
-  localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+    const rallyKey = 'Rally';
+    let rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+    rallyValue.apiKey = key;
+    localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
 }
