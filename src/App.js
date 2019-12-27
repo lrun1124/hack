@@ -7,36 +7,84 @@ import {
   Button,
 } from 'antd';
 
-const rallyKey = 'Rally';
-if (!localStorage.getItem(rallyKey)) {
+const RALLY_PROPERTIES = 'Rally';
+const APIKEY = 'apiKey';
+const DISCUSSION = 'DISCUSSION';
+const TAG = 'TAG';
+const PMSTATUS = 'PMSTATUS';
+if (!localStorage.getItem(RALLY_PROPERTIES)) {
   let rallyValue = {
     apiKey: '',
-    defectFields: {}
+    defectFields: {},
+    DISCUSSION: false,
+    TAG: false,
+    PMSTATUS: false
   };
-  localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+  localStorage.setItem(RALLY_PROPERTIES, JSON.stringify(rallyValue));
+}
+
+var sendMessageToContentScript = (message, callback) => {
+  getCurrentTabId((tabId) =>
+  {
+    chrome.tabs.sendMessage(tabId, message, function(response)
+    {
+      if(callback) callback(response);
+    });
+  });
+}
+
+ var getCurrentTabId = (callback) => {
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+  if(callback) callback(tabs.length ? tabs[0].id: null);
+  });
 }
 
 export default class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const apiKey = this.getAPIKey();
+    const apiKey = this.getProperty(APIKEY);
+    const discussEnabled = this.getProperty(DISCUSSION);
+    const tagEnabled = this.getProperty(TAG);
+    const pmstatusEnabled = this.getProperty(PMSTATUS);
     this.state = {
       editKey: !apiKey,
       login: !!apiKey,
-      inputKeyString: apiKey
+      inputKeyString: apiKey,
+      discussEnabled: discussEnabled,
+      statusEnabled: pmstatusEnabled,
+      tagEnabled: tagEnabled
     };
   }
 
-  getAPIKey = () => {
-    const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-    return rallyValue.apiKey;
+  getProperty = (key) => {
+    const rallyValue = JSON.parse(localStorage.getItem(RALLY_PROPERTIES));
+    return rallyValue[key];
   }
 
-  updateAPIKey = (key) => {
-    let rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-    rallyValue.apiKey = key;
-    localStorage.setItem(rallyKey, JSON.stringify(rallyValue));
+  updateProperty = (key, value) => {
+    let rallyValue = JSON.parse(localStorage.getItem(RALLY_PROPERTIES));
+    rallyValue[key] = value;
+    localStorage.setItem(RALLY_PROPERTIES, JSON.stringify(rallyValue));
+    this.sendMessageToContentScript(rallyValue, (response) => {
+      if(response) console('content-script：'+ response);
+    });
+  }
+  // 向content-script主动发送消息
+  sendMessageToContentScript = (message, callback) => {
+    this.getCurrentTabId((tabId) =>
+    {
+      chrome.tabs.sendMessage(tabId, message, function(response)
+      {
+        if(callback) callback(response);
+      });
+    });
+  }
+
+   getCurrentTabId = (callback) => {
+	  chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+		if(callback) callback(tabs.length ? tabs[0].id: null);
+	  });
   }
 
   onSwitchPanel = () => {
@@ -46,7 +94,7 @@ export default class App extends React.PureComponent {
   }
 
   onSaveClick = (e) => {
-    this.updateAPIKey(this.state.inputKeyString);
+    this.updateProperty(APIKEY, this.state.inputKeyString);
     this.setState({
       editKey: !this.state.editKey,
       login: true
@@ -57,6 +105,20 @@ export default class App extends React.PureComponent {
     this.setState({ inputKeyString: e.target.value });
   };
 
+  onDisSwitchChange = (checked) => {
+    this.setState({ discussEnabled: checked });
+    this.updateProperty(DISCUSSION, checked);
+  };
+
+  onTagSwitchChange = (checked) => {
+    this.setState({ tagEnabled: checked });
+    this.updateProperty(TAG, checked);
+  };
+
+  onStatusSwitchChange = (checked) => {
+    this.setState({ statusEnabled: checked });
+    this.updateProperty(PMSTATUS, checked);
+  };
   render() {
     const {editKey, login, inputKeyString} = this.state
 
@@ -71,23 +133,23 @@ export default class App extends React.PureComponent {
         <div style={{ fontWeight: 'bold'}}>Editable Column</div>
         <div className="app-field">
           <span className="app-dis">Discussion</span>
-          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked />
+          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked={this.state.discussEnabled} onChange={this.onDisSwitchChange}/>
         </div>
         <div className="app-field">
           <span className="app-dis">Regression</span>
-          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked />
+          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultunChecked />
         </div>
         <div className="app-field">
           <span className="app-dis">Iteration</span>
-          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked />
+          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultunChecked />
         </div>
         <div className="app-field">
           <span className="app-dis">Tag</span>
-          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked />
+          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled'  defaultChecked={this.state.tagEnabled} onChange={this.onTagSwitchChange}/>
         </div>
         <div className="app-field">
           <span className="app-dis">PM status</span>
-          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled' defaultChecked />
+          <Switch checkedChildren='Enabled' className="app-switch" unCheckedChildren='Disabled'  defaultChecked={this.state.statusEnabled} onChange={this.onStatusSwitchChange}/>
         </div>
       </div>
     )

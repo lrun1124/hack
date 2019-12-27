@@ -105,7 +105,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
     } else if (request.type === 'writeDiscussion') {
         writeDiscussionToRally(request.objectID, request.text, sendResponse)
     } else if (request.type === 'updateDefectField') {
-        updateDefectFieldValueOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
+        updateDefectFieldValueOnRally(request.objectID, request.fieldName, request.fieldValue, sendResponse)
     } else if (request.type === 'updatePortfolioItem') {
         updatePortfolioItemOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
     }
@@ -113,8 +113,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 });
 
 function getAPIKey() {
-  const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
-  return rallyValue.apiKey;
+  //const rallyValue = JSON.parse(localStorage.getItem(rallyKey));
+  //return rallyValue.apiKey;
+  return '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
 }
 
 function updateAPIKey(key) {
