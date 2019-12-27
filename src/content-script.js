@@ -6,7 +6,11 @@ const REGRESSION_VALUE = [
     "Found by new feature testing"
 ];
 
-
+const RALLY_PROPERTIES = 'Rally';
+const APIKEY = 'apiKey';
+const DISCUSSION = 'DISCUSSION';
+const TAG = 'TAG';
+const PMSTATUS = 'PMSTATUS';
 const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
 const defaultName = 'Li Hao'; // _N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk
 const defaultDate = '2019-12-28';
@@ -73,6 +77,14 @@ const tempArr = [{
     machineName: 'vpn',
     newMahinceId: '018'
 }];
+const statusMap = {
+    'PM0 Discarded' : '1.0',
+    'PM1 In Progress' : '2.0',
+    'PM2 PM Approved' : '3.0',
+    'PM3 TVP PM Approved' : '4.0',
+    'PM4 PO Approved' : '5.0',
+    'PM5 TVP P0 Approved' : '6.0'
+}
 
 const statusArr = [{
     machineName: 'PM0 Discarded',
@@ -99,16 +111,29 @@ const statusArr = [{
     newMahinceId: '006'
 }];
 
+if (!localStorage.getItem(RALLY_PROPERTIES)) {
+    let rallyValue = {
+      apiKey: '',
+      defectFields: {},
+      DISCUSSION: false,
+      TAG: false,
+      PMSTATUS: false
+    };
+    localStorage.setItem(RALLY_PROPERTIES, JSON.stringify(rallyValue));
+}
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	console.log('收到来自 ' + (sender.tab ? "content-script(" + sender.tab.url + ")" : "popup或者background") + ' 的消息：', request);
+    localStorage.setItem(RALLY_PROPERTIES, JSON.stringify(request));
+});
+
 document.addEventListener('click', function(event) {
-    if(event.target.innerText === 'Link' &&  window.openDiscussion !== false){
+    if(getProperty(DISCUSSION) && event.target.getAttribute('href') && event.target.getAttribute('href').endsWith('discussion')){
         window.rallyClickTarget = event.target;
         UpdateObjectID();
         event.preventDefault();
-        console.log('click');
-
-        // send message to background.js
         const temp = event.target.href.split('/');
-        objectID = temp[temp.length-1];
+        objectID = temp[temp.length-2];
         // read discussion
         let read_message = {type: 'readDiscussion', objectID: objectID};
         chrome.runtime.sendMessage(read_message, function(response) {
@@ -141,13 +166,18 @@ document.addEventListener('click', function(event) {
     //     });
     //     event.target.innerText = fieldValue;
     //} 
-    else if (event.target.getAttribute('ei') === '14') {
+    //else if (getProperty(TAG) && event.target.getAttribute('ei') === '17') {
+    else if (getProperty(TAG) && event.target.getAttribute('class').startsWith('r-c0-0_K')) {
         window.rallyClickTarget = event.target;
-        UpdateObjectID();
+        var href = event.target.parentNode.children[1].children[0].getAttribute('href');
+        const temp = href.split('/');
+        objectID = temp[temp.length-1];
         TagPulldown(undefined, event.clientX, event.clientY);
-    } else if (event.target.getAttribute('ei') === '15'){
+    } else if (getProperty(PMSTATUS) && event.target.getAttribute('class').startsWith('r-c7-0_K')){
         window.rallyClickTarget = event.target;
-        UpdateObjectID();
+        var href = event.target.parentNode.children[0].children[0].getAttribute('href');
+        const temp = href.split('/');
+        objectID = temp[temp.length-1];
         statusPulldown(undefined, event.clientX, event.clientY);
     } else if (event.target.getAttribute('ei') === '7') {
         // send message to background.js
@@ -250,7 +280,7 @@ function bindStatusEvent(){
     oPostBtn.onclick = function(){
         if(window.rallyClickTarget) {
             writePMStatueToRally(objectID, APIKey, currentStatus.value)
-            window.rallyClickTarget.innerText = currentStatus.value;
+            window.rallyClickTarget.innerText = statusMap[currentStatus.value];
             document.getElementById('statusPulldown').remove();
         }
     }
@@ -458,7 +488,13 @@ function clearTarget() {
 }
 
 function UpdateObjectID() {
-    var current = window.rallyClickTarget;
-    //return current.parentNode.children[3].innerText;
-    objectID = '292227692176';
+    // var current = window.rallyClickTarget;
+    // return current.parentNode.children[3].innerText;
+    //objectID = '292227692176';
+}
+
+function getProperty (key) {
+    if(!localStorage.getItem(RALLY_PROPERTIES)) return false;
+    const rallyValue = JSON.parse(localStorage.getItem(RALLY_PROPERTIES));
+    return rallyValue[key];
 }
