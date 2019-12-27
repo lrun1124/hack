@@ -15,68 +15,44 @@ const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
 const defaultName = 'Li Hao'; // _N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk
 const defaultDate = '2019-12-28';
 var objectID = '';
-const tempArr = [{
-    machineName: 'Rally',
-    newMahinceId: '001'
-},
-{
-    machineName: 'Agile',
-    newMahinceId: '002'
-},
-{
-    machineName: 'data',
-    newMahinceId: '003'
-},
-{
-    machineName: 'plan',
-    newMahinceId: '004'
-},
-{
-    machineName: 'security',
-    newMahinceId: '005'
-},
-{
-    machineName: 'mission',
-    newMahinceId: '006'
-},
-{
-    machineName: 'Logical Access',
-    newMahinceId: '007'
-},
-{
-    machineName: 'Research',
-    newMahinceId: '008'
-},{
-    machineName: 'Server Dependency',
-    newMahinceId: '009'
-},
-{
-    machineName: 'Polaris',
-    newMahinceId: '0010'
-},
-{
-    machineName: 'Logical Access',
-    newMahinceId: '011'
-},
-{
-    machineName: 'Directory Gateway',
-    newMahinceId: '012'
-},{
-    machineName: 'Reviewed',
-    newMahinceId: '013'
-},
-{
-    machineName: 'ABA',
-    newMahinceId: '014'
-},
-{
-    machineName: '[T161]',
-    newMahinceId: '015'
-},
-{
-    machineName: 'vpn',
-    newMahinceId: '018'
-}];
+const tagsArray = [
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/339456604868",
+        "Name": "11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/341895064156",
+        "Name": "SRANA-11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/344806579644",
+        "Name": "AT_11.2.1 Candidate"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/350019942064",
+        "Name": "11.2.1 - AT Approved"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/351710850240",
+        "Name": "vivi watch list_11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/354712007868",
+        "Name": "APO reviewed for 11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/355380176620",
+        "Name": "High risk for 11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/355380179744",
+        "Name": "Low risk for 11.2.1"
+    },
+    {
+        "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/356439093812",
+        "Name": "11.2.1 CPO Approved"
+    }
+];
 const statusMap = {
     'PM0 Discarded' : '1.0',
     'PM1 In Progress' : '2.0',
@@ -87,28 +63,28 @@ const statusMap = {
 }
 
 const statusArr = [{
-    machineName: 'PM0 Discarded',
-    newMahinceId: '001'
+    Name: 'PM0 Discarded',
+    _ref: '001'
 },
 {
-    machineName: 'PM1 In Progress',
-    newMahinceId: '002'
+    Name: 'PM1 In Progress',
+    _ref: '002'
 },
 {
-    machineName: 'PM2 PM Approved',
-    newMahinceId: '003'
+    Name: 'PM2 PM Approved',
+    _ref: '003'
 },
 {
-    machineName: 'PM3 TVP PM Approved',
-    newMahinceId: '004'
+    Name: 'PM3 TVP PM Approved',
+    _ref: '004'
 },
 {
-    machineName: 'PM4 PO Approved',
-    newMahinceId: '005'
+    Name: 'PM4 PO Approved',
+    _ref: '005'
 },
 {
-    machineName: 'PM5 TVP P0 Approved',
-    newMahinceId: '006'
+    Name: 'PM5 TVP P0 Approved',
+    _ref: '006'
 }];
 
 if (!localStorage.getItem(RALLY_PROPERTIES)) {
@@ -179,29 +155,6 @@ document.addEventListener('click', function(event) {
         const temp = href.split('/');
         objectID = temp[temp.length-1];
         statusPulldown(undefined, event.clientX, event.clientY);
-    } else if (event.target.getAttribute('ei') === '7') {
-        // send message to background.js
-        const defectID = '341373250384'/*DE152224*/;
-        const tagList = [
-            {
-                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/294687977200"
-            },
-            {
-                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/336449933884"
-            }
-        ];
-
-        // Example 1 --> add defect tags
-        let message = {type: 'addDefectTags', objectID: defectID, tagList: tagList};
-        chrome.runtime.sendMessage(message, function(response) {
-            console.log(response);
-        });
-
-        // Example 2 --> remove defect tags
-        message = {type: 'removeDefectTags', objectID: defectID, tagList: tagList};
-        chrome.runtime.sendMessage(message, function(response) {
-            console.log(response);
-        });
     }
 });
 
@@ -264,8 +217,15 @@ function bindTagEvent(){
     }
     oPostBtn.onclick = function(){
         if(window.rallyClickTarget) {
-            window.rallyClickTarget.innerText = currentTag.value;
-            document.getElementById('TagPulldown').remove();
+            const defectTagList = currentTag.value.split(',');
+            const tagList = tagsArray.filter(function(item) {
+                if(defectTagList.includes(item.Name))
+                    return item._ref;
+            });
+            addDefectTagsWithKey(tagList, function(response) {
+                window.rallyClickTarget.innerText = currentTag.value;
+                document.getElementById('TagPulldown').remove();
+            });
         }
     }
     oCloseBtn.onclick = function() {
@@ -294,7 +254,7 @@ function TagPulldown(list, x, y) {
     if(document.getElementById(eleId)) {
         document.getElementById(eleId).remove();
     }
-	list = list || tempArr;
+	list = list || tagsArray;
     var ele = document.createElement('div');
     ele.id = eleId;
     ele.className = 'chrome-plugin-simple-tip';
@@ -326,7 +286,7 @@ function TagPulldown(list, x, y) {
     `
 	document.body.appendChild(ele);
     document.getElementById('current_tag').value = window.rallyClickTarget.innerText;
-    searchInput(tempArr);
+    searchInput(tagsArray);
     bindTagEvent();
 }
 
@@ -371,13 +331,13 @@ function statusPulldown(list, x, y) {
 function newOptions(tempArr){
     var listArr = [];
     for(var i=0;i<tempArr.length;i++){
-        if(tempArr[i].machineName.indexOf($('#select_input').val()) > -1){
+        if(tempArr[i].Name.indexOf($('#select_input').val()) > -1){
             listArr.push(tempArr[i]);
         }
     }
     var options = '';
     for(var i = 0; i < listArr.length; i++) {
-        opt = '<li class="li-select" data-newMachineId="' + listArr[i].newMahinceId + '">' + listArr[i].machineName + '</li>';
+        opt = '<li class="li-select" data-newMachineId="' + listArr[i]._ref + '">' + listArr[i].Name + '</li>';
         options += opt;
     }
     if(options == ''){
@@ -498,3 +458,19 @@ function getProperty (key) {
     const rallyValue = JSON.parse(localStorage.getItem(RALLY_PROPERTIES));
     return rallyValue[key];
 }
+
+// ------------------------ BEGIN (TAG messages send to background) ------------------------
+function addDefectTagsWithKey(tagList, callback) {
+    let message = {type: 'addDefectTags', objectID: objectID, tagList: tagList};
+    chrome.runtime.sendMessage(message, function(response) {
+        callback(response);
+    });
+}
+
+function removeDefectTagsWithKey(tagList, callback) {
+    message = {type: 'removeDefectTags', objectID: objectID, tagList: tagList};
+    chrome.runtime.sendMessage(message, function(response) {
+        callback(response);
+    });
+}
+// ------------------------ End   (TAG messages send to background) ------------------------

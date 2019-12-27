@@ -88,6 +88,47 @@ function removeDefectTagsOnRally(objectID, tagList, resolve, reject) {
     postRequest(url, JSON.stringify(param), resolve, reject);
 }
 
+function queryTagsOnRally(queryValue, resolve, reject) {
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/tag?query=(Name Contains "${query_value}")&start=1&pagesize=2000'
+                .replace('${query_value}', queryValue);
+    
+    let request = new XMLHttpRequest();
+    request.open('GET', url);
+    request.responseType = 'json';
+    request.setRequestHeader('ZSESSIONID', getAPIKey());
+    request.onreadystatechange = function() {
+		if (request.readyState == XMLHttpRequest.DONE) {
+			if (request.status == 200) {
+                console.log(request.response.QueryResult.Results);
+                resolve(request.response.QueryResult.Results);
+			} else {
+				reject(request.status);
+			}
+		}
+	};
+    request.send();
+}
+
+function getDefectTagsOnRally(objectID, resolve, reject) {
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/artifact/' + objectID + '/Tags';
+    
+    let request = new XMLHttpRequest();
+    request.open('GET', url);
+    request.responseType = 'json';
+    request.setRequestHeader('ZSESSIONID', getAPIKey());
+    request.onreadystatechange = function() {
+		if (request.readyState == XMLHttpRequest.DONE) {
+			if (request.status == 200) {
+                console.log(request.response.QueryResult.Results);
+                resolve(request.response.QueryResult.Results);
+			} else {
+				reject(request.status);
+			}
+		}
+	};
+    request.send();
+}
+
 // listen the message from content-script.js
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 {
