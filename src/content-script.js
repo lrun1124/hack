@@ -102,6 +102,7 @@ const statusArr = [{
 document.addEventListener('click', function(event) {
     if(event.target.innerText === 'Link' &&  window.openDiscussion !== false){
         window.rallyClickTarget = event.target;
+        UpdateObjectID();
         event.preventDefault();
         console.log('click');
 
@@ -119,31 +120,35 @@ document.addEventListener('click', function(event) {
         });
 
         tip(event.target.href, event.clientX, event.clientY);
-    } else if(REGRESSION_VALUE.includes(event.target.innerText)) {
-        window.rallyClickTarget = event.target;
-        /*
-         * code example
-         * modify later
-        */
+    } 
+    // else if(REGRESSION_VALUE.includes(event.target.innerText)) {
+    //     window.rallyClickTarget = event.target;
+    //     /*
+    //      * code example
+    //      * modify later
+    //     */
         
-        // send message to background.js
-        const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
-        const defectID = '341373250384'/*DE152224*/;
-        const fieldName = 'c_Regression';
-        const fieldValue = 'No';
+    //     // send message to background.js
+    //     const APIKey = '_N4lmXxoDRnamXQ7lldXDF1VvEpkPUyGjfoVqqodIUk';
+    //     const defectID = '341373250384'/*DE152224*/;
+    //     const fieldName = 'c_Regression';
+    //     const fieldValue = 'No';
 
-        // 3) update rally regression value
-        let message = {type: 'updateDefectField', objectID: defectID, APIKey: APIKey, fieldName: fieldName, fieldValue: fieldValue};
-        chrome.runtime.sendMessage(message, function(response) {
-            console.log(response);
-        });
+    //     // 3) update rally regression value
+    //     let message = {type: 'updateDefectField', objectID: defectID, APIKey: APIKey, fieldName: fieldName, fieldValue: fieldValue};
+    //     chrome.runtime.sendMessage(message, function(response) {
+    //         console.log(response);
+    //     });
 
-        event.target.innerText = fieldValue;
-    } else if (event.target.getAttribute('ei') === '14') {
+    //     event.target.innerText = fieldValue;
+    //} 
+    else if (event.target.getAttribute('ei') === '14') {
         window.rallyClickTarget = event.target;
+        UpdateObjectID();
         TagPulldown(undefined, event.clientX, event.clientY);
     } else if (event.target.getAttribute('ei') === '15'){
         window.rallyClickTarget = event.target;
+        UpdateObjectID();
         statusPulldown(undefined, event.clientX, event.clientY);
     }
     
@@ -186,7 +191,7 @@ function bindEvent(){
     oPostBtn.onclick = function(){
         if(oInput.value){          
             addComment(oInput.value, true);
-            writeToRally(objectID, window.APIKey || APIKey, oInput.value);
+            writeToRally(objectID, APIKey, oInput.value);
             oInput.value = "";
         }
     }
@@ -223,6 +228,7 @@ function bindStatusEvent(){
     var currentStatus = document.getElementById("select_input");
     oPostBtn.onclick = function(){
         if(window.rallyClickTarget) {
+            writePMStatueToRally(objectID, APIKey, currentStatus.value)
             window.rallyClickTarget.innerText = currentStatus.value;
             document.getElementById('statusPulldown').remove();
         }
@@ -417,6 +423,21 @@ function writeToRally(ObjectID, APIKey, text) {
     });
 }
 
+function writePMStatueToRally(ObjectID, APIKey, text) {
+    const fieldName = 'c_PMStatus';
+
+    let message = {type: 'updatePortfolioItem', objectID: ObjectID, APIKey: APIKey, fieldName: fieldName, fieldValue: text};
+    chrome.runtime.sendMessage(message, function(response) {
+        console.log(response);
+    });
+}
+
 function clearTarget() {
     window.rallyClickTarget = undefined;
+}
+
+function UpdateObjectID() {
+    var current = window.rallyClickTarget;
+    //return current.parentNode.children[3].innerText;
+    objectID = '292227692176';
 }

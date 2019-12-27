@@ -70,6 +70,31 @@ function updateDefectFieldValueOnRally(objectID, APIKey, fieldName, fieldValue, 
     request.send(stringifyParam);
 }
 
+function updatePortfolioItemOnRally(objectID, APIKey, fieldName, fieldValue, resolve, reject) {
+    const url = 'https://rally1.rallydev.com/slm/webservice/v2.0/portfolioitem/' + objectID;
+    const param = {
+        PortfolioItem: {
+            '${fieldName}': fieldValue
+        }
+    };
+    const stringifyParam = JSON.stringify(param).replace('${fieldName}', fieldName);
+
+    let request = new XMLHttpRequest();
+    request.open('POST', url, true);
+    request.setRequestHeader('ZSESSIONID', APIKey);
+    request.setRequestHeader('Content-Type', 'text/plain');
+
+    request.onreadystatechange = function() {
+		if (request.readyState == XMLHttpRequest.DONE) {
+			if (request.status == 200) {
+                resolve(request.response);
+			} else {
+				reject(request.status);
+			}
+		}
+    };
+    request.send(stringifyParam);
+}
 
 // listen the message from content-script.js
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
@@ -81,6 +106,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
         writeDiscussionToRally(request.objectID, request.APIKey, request.text, sendResponse)
     } else if (request.type === 'updateDefectField') {
         updateDefectFieldValueOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
+    } else if (request.type === 'updatePortfolioItem') {
+        updatePortfolioItemOnRally(request.objectID, request.APIKey, request.fieldName, request.fieldValue, sendResponse)
     }
     return true;
 });
