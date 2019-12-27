@@ -149,8 +149,30 @@ document.addEventListener('click', function(event) {
         window.rallyClickTarget = event.target;
         UpdateObjectID();
         statusPulldown(undefined, event.clientX, event.clientY);
+    } else if (event.target.getAttribute('ei') === '7') {
+        // send message to background.js
+        const defectID = '341373250384'/*DE152224*/;
+        const tagList = [
+            {
+                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/294687977200"
+            },
+            {
+                "_ref": "https://rally1.rallydev.com/slm/webservice/v2.0/tag/336449933884"
+            }
+        ];
+
+        // Example 1 --> add defect tags
+        let message = {type: 'addDefectTags', objectID: defectID, tagList: tagList};
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log(response);
+        });
+
+        // Example 2 --> remove defect tags
+        message = {type: 'removeDefectTags', objectID: defectID, tagList: tagList};
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log(response);
+        });
     }
-    
 });
 
 function addComment(msg, isAdd){
